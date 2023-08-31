@@ -1,0 +1,16 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "McKayla Sharp",
+    "section": "",
+    "text": "This is the publishing page for my data visualization projects.\n\nplot(iris)"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "I am a graduate student at University of Texas at Dallas studying Social Data Analytics and Research.\n\n1 + 1\n\n[1] 2"
+  }
+]
