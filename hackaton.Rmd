@@ -1,0 +1,48 @@
+---
+title: "hackaton"
+author: "-"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+data <- read.csv("C:/Users/15209/Desktop/UTD/Fall 2023/Data Visualization/data.csv")
+```
+
+```{r}
+# I make a list of plots (no content yet)
+lista <- list()
+
+# Since I want to give unique colors I create a list based on different countries
+lista2 <- unique(data$Country)
+
+# I make a  custom color palette based on my country names and match it
+colors <- scales::hue_pal()(length(lista2))
+country_colors <- setNames(colors, lista2)
+
+# I make a for loop to create 4 charts
+for (year in c(2012, 2015, 2018, 2021)) {
+  # I filter through the data for the current year
+  year_data <- data[data$Year == year, ]
+  
+  # Create a plot for the current year
+  plot <- ggplot(year_data, aes(x = Country, y = Trade.Percent, fill = Country)) +
+    geom_bar(stat = "identity") +
+    ggtitle(paste("Year:", year)) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_fill_manual(values = country_colors) +  # Use the custom color palette
+    guides(fill = FALSE)  # I remove the legend since it's bothersome
+  
+  # Add the plot to the list
+  lista[[as.character(year)]] <- plot
+}
+
+# Combine the plots into a table
+grid.arrange(grobs = lista, ncol = 2)  
+
+
+
+```
