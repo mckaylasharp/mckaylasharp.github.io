@@ -1,0 +1,155 @@
+---
+title: "Assignments"
+---
+
+Hackathon
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(gridExtra)
+data <- read.csv("C:/Users/15209/Desktop/UTD/Fall 2023/Data Visualization/data.csv")
+```
+
+```{r, echo=FALSE}
+# I make a list of plots (no content yet)
+lista <- list()
+
+# Since I want to give unique colors I create a list based on different countries
+lista2 <- unique(data$Country)
+
+# I make a  custom color palette based on my country names and match it
+colors <- scales::hue_pal()(length(lista2))
+country_colors <- setNames(colors, lista2)
+
+# I make a for loop to create 4 charts
+for (year in c(2012, 2015, 2018, 2021)) {
+  # I filter through the data for the current year
+  year_data <- data[data$Year == year, ]
+  
+  # Create a plot for the current year
+  plot <- ggplot(year_data, aes(x = Country, y = Trade.Percent, fill = Country)) +
+    geom_bar(stat = "identity") +
+    ggtitle(paste("Year:", year)) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_fill_manual(values = country_colors) +  # Use the custom color palette
+    guides(fill = FALSE)  # I remove the legend since it's bothersome
+  
+  # Add the plot to the list
+  lista[[as.character(year)]] <- plot
+}
+
+# Combine the plots into a table
+grid.arrange(grobs = lista, ncol = 2)  
+
+```
+
+Hackathon 2
+
+```{r, echo=FALSE}
+library(ggplot2)
+df <- read.csv("C:/Users/15209/Desktop/UTD/Fall 2023/Data Visualization/2021.csv")
+```
+
+```{r, echo=FALSE}
+# Define the number of ranges
+num_ranges <- 8
+
+# Calculate the minimum and maximum Trade.Value
+min_trade_value <- min(df$Trade.Value)
+max_trade_value <- max(df$Trade.Value)
+
+# Create custom ranges with the same distance from each other
+range_width <- (max_trade_value - min_trade_value) / num_ranges
+custom_ranges <- seq(min_trade_value, max_trade_value, by = range_width)
+
+# Use cut to categorize the Trade.Value into the custom ranges
+df$Trade.Value_Range <- cut(df$Trade.Value, breaks = custom_ranges, include.lowest = TRUE)
+
+# Count the number of countries in each range and convert to a data frame
+counts <- as.data.frame(table(df$Trade.Value_Range))
+
+# Create a ggplot bar plot
+p <- ggplot(data = counts, aes(x = Var1, y = Freq)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  labs(title = "Number of Countries in Trade.Value Ranges",
+       x = "Trade.Value Ranges",
+       y = "Number of Countries") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Add labels with counts above each bar
+p + geom_text(aes(label = Freq), vjust = -0.5)
+
+```
+
+Assignment 1
+
+```{r, echo=FALSE}
+library(gsubfn)
+library(tidyverse)
+
+```
+
+```{r, echo=FALSE}
+
+axiom="X"
+rules=list("X"="F-[[X]+X]+F[+FX]-X", "F"="FF")
+angle=22.5
+depth=6
+
+
+for (i in 1:depth) axiom=gsubfn(".", rules, axiom)
+
+actions=str_extract_all(axiom, "\\d*\\+|\\d*\\-|F|L|R|\\[|\\]|\\|") %>% unlist
+
+status=data.frame(x=numeric(0), y=numeric(0), alfa=numeric(0))
+points=data.frame(x1 = 0, y1 = 0, x2 = NA, y2 = NA, alfa=90, depth=1)
+
+
+# Generating data
+# Note: may take a minute or two
+
+for (action in actions)
+{
+  if (action=="F")
+  {
+    x=points[1, "x1"]+cos(points[1, "alfa"]*(pi/180))
+    y=points[1, "y1"]+sin(points[1, "alfa"]*(pi/180))
+    points[1,"x2"]=x
+    points[1,"y2"]=y
+    data.frame(x1 = x, y1 = y, x2 = NA, y2 = NA,
+               alfa=points[1, "alfa"],
+               depth=points[1,"depth"]) %>% rbind(points)->points
+  }
+  if (action %in% c("+", "-")){
+    alfa=points[1, "alfa"]
+    points[1, "alfa"]=eval(parse(text=paste0("alfa",action, angle)))
+  }
+  if(action=="["){
+    data.frame(x=points[1, "x1"], y=points[1, "y1"], alfa=points[1, "alfa"]) %>%
+      rbind(status) -> status
+    points[1, "depth"]=points[1, "depth"]+1
+  }
+
+  if(action=="]"){
+    depth=points[1, "depth"]
+    points[-1,]->points
+    data.frame(x1=status[1, "x"], y1=status[1, "y"], x2=NA, y2=NA,
+               alfa=status[1, "alfa"],
+               depth=depth-1) %>%
+      rbind(points) -> points
+    status[-1,]->status
+  }
+}
+
+ggplot() +
+  geom_segment(aes(x = x1, y = y1, xend = x2, yend = y2),
+               lineend = "round",
+               color= "indianred4", # Set your own Fall color? ## find colors from color-hex?
+               data=na.omit(points)) +
+  coord_fixed(ratio = 1) +
+  theme_void() # No grid nor axes
+
+
+```
